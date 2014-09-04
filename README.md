@@ -1,4 +1,4 @@
-Hackerrank_September2020
+hackerrank
 ========================
 
-The code submitted for Hackerrank September 2020 Contest
+some code snippets submitted to hackerrank competitions
