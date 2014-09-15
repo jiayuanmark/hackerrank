@@ -1,0 +1,44 @@
+	Sun Sep 14 13:28 2014 Time and Allocation Profiling Report  (Final)
+
+	   bangalore-bank +RTS -p -K512M -RTS
+
+	total time  =        5.98 secs   (5979 ticks @ 1000 us, 1 processor)
+	total alloc = 10,847,145,760 bytes  (excludes profiling overheads)
+
+COST CENTRE MODULE    %time %alloc
+
+solve.loop  Main       88.9   92.2
+solve.diff  Main       10.1    7.4
+
+
+                                                                   individual     inherited
+COST CENTRE              MODULE                  no.     entries  %time %alloc   %time %alloc
+
+MAIN                     MAIN                     58           0    0.0    0.0   100.0  100.0
+ main                    Main                    117           0    0.0    0.0   100.0  100.0
+  solve                  Main                    120           1    0.0    0.0    99.1   99.6
+   solve.mmin            Main                    132       10000    0.0    0.0     0.0    0.0
+    solve.mmin.\         Main                    133        9999    0.0    0.0     0.0    0.0
+   solve.dp              Main                    124       10000    0.1    0.0    99.1   99.6
+    solve.loop           Main                    130    49995000   88.9   92.2    99.0   99.5
+     solve.diff          Main                    131    49985001   10.1    7.4    10.1    7.4
+    solve.dp.inc         Main                    125        9999    0.0    0.0     0.0    0.0
+     solve.diff          Main                    126        9999    0.0    0.0     0.0    0.0
+  readInput              Main                    119           0    0.1    0.0     0.9    0.4
+   readInput.account     Main                    127           1    0.1    0.0     0.8    0.4
+    readInput.parseDigit Main                    128       10000    0.7    0.3     0.7    0.3
+   readInput.n           Main                    121           1    0.0    0.0     0.0    0.0
+ CAF:main1               Main                    114           0    0.0    0.0     0.0    0.0
+  main                   Main                    116           1    0.0    0.0     0.0    0.0
+ CAF:a1_r3n1             Main                    110           0    0.0    0.0     0.0    0.0
+  readInput              Main                    118           1    0.0    0.0     0.0    0.0
+ CAF:lvl9_r3mZ           Main                    108           0    0.0    0.0     0.0    0.0
+  readInput              Main                    122           0    0.0    0.0     0.0    0.0
+   readInput.n           Main                    123           0    0.0    0.0     0.0    0.0
+ CAF:lvl5_r3mV           Main                    105           0    0.0    0.0     0.0    0.0
+  readInput.parseDigit   Main                    129           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.Conc.Signal         101           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Encoding          94           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Encoding.Iconv    92           0    0.0    0.0     0.0    0.0
+ CAF                     GHC.IO.Handle.FD         85           0    0.0    0.0     0.0    0.0
+ CAF                     Text.Read.Lex            72           0    0.0    0.0     0.0    0.0

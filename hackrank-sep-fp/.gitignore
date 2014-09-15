@@ -1,0 +1,6 @@
+input*
+*.hi
+*.out
+*.o
+*.prof
+!*.*
