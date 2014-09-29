@@ -13,12 +13,12 @@ def makeRegexQuery(s):
 		t = s + '\Z'
 	return ('^' + t)
 
+punc = set(string.punctuation.translate(None, "'"))
+
 def normalize(s):
-	p = string.punctuation
-	s = s.strip()
-	while len(s) > 0 and s[0] in p:
+	while len(s) > 0 and s[0] in punc:
 		s = s[1:]
-	while len(s) > 0 and s[-1] in p:
+	while len(s) > 0 and s[-1] in punc:
 		s = s[:-1]
 	return s
 
@@ -27,10 +27,13 @@ class Article:
 		self.data = {}
 		xmlroot = ET.fromstring(s)
 		for child in xmlroot:
+			val = child.text.strip()
+			if child.tag != "guid" and child.tag != "created":
+				val = val.lower()
 			if child.tag == "tag":
-				self.data.setdefault("tag", []).append(child.text)
+				self.data.setdefault("tag", []).append(val)
 			else:
-				self.data[child.tag] = child.text.strip()
+				self.data[child.tag] = val
 
 	def __getitem__(self, field):
 		if field == "tag":
@@ -39,11 +42,10 @@ class Article:
 
 class Corpus:
 	def __init__(self):
-		self.termIndex = {}
-		self.tagIndex = {}
-		self.createIndex = {}
-		self.article = {}
-		self.deleted = set([])
+		self.termIndex = {} # term-to-guid index
+		self.tagIndex = {} # tag-to-guid index
+		self.article = {} # all articles
+		self.deleted = set()
 
 	def printResult(self, res):
 		res = sorted(res, key=lambda x: isoDateToEpoch(self.article[x]["created"]))
@@ -53,7 +55,7 @@ class Corpus:
 		guid = article["guid"]
 		self.article[guid] = article
 		self.deleted.discard(guid)
-		# Add
+		# Update index
 		content = article["content"]
 		for token in content.split():
 			token = normalize(token)
@@ -63,12 +65,11 @@ class Corpus:
 		tags = article["tag"]
 		for t in tags:
 			self.tagIndex.setdefault(t, set()).add(guid)
-		self.createIndex.setdefault(isoDateToEpoch(article["created"]), set([])).add(guid)
 
 	def update(self, article):
 		guid = article["guid"]
 		old = self.article[guid]
-		# Remove
+		# Remove from index
 		content = old["content"]
 		for token in content.split():
 			token = normalize(token)
@@ -78,7 +79,6 @@ class Corpus:
 		tags = old["tag"]
 		for t in tags:
 			self.tagIndex.setdefault(t, set()).discard(guid)
-		self.createIndex.setdefault(isoDateToEpoch(old["created"]), set([])).discard(guid)
 		self.create(article)
 
 	def delete(self, guid):
@@ -87,7 +87,7 @@ class Corpus:
 	def searchByTerms(self, terms):
 		resList = []
 		for term in terms.split():
-			q = makeRegexQuery(term)
+			q = makeRegexQuery(term.lower())
 			res = set()
 			for key in self.termIndex:
 				if re.match(q, key) is not None:
@@ -103,7 +103,7 @@ class Corpus:
 
 	def searchByTag(self, tag):
 		res = set()
-		q = makeRegexQuery(tag)
+		q = makeRegexQuery(tag.lower())
 		for key in self.tagIndex:
 			if re.match(q, key) is not None:
 				res.update(self.tagIndex[key])
@@ -113,11 +113,8 @@ class Corpus:
 	def searchByCreateTime(self, time):
 		dt = datetime.strptime(time, "%Y%m%d")
 		ts = int(dt.strftime('%s'))
-
-		res = set()
-		for key in self.createIndex:
-			if key >= ts:
-				res.update(self.createIndex[key])
+		after = filter(lambda x : isoDateToEpoch(x["created"]) >= ts, self.article.values())
+		res = set(map(lambda x:x["guid"], after))
 		res.difference_update(self.deleted)
 		self.printResult(res)
 
