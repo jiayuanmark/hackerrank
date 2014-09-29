@@ -13,6 +13,15 @@ def makeRegexQuery(s):
 		t = s + '\Z'
 	return ('^' + t)
 
+def normalize(s):
+	p = string.punctuation
+	s = s.strip()
+	while len(s) > 0 and s[0] in p:
+		s = s[1:]
+	while len(s) > 0 and s[-1] in p:
+		s = s[:-1]
+	return s
+
 class Article:
 	def __init__(self, s):
 		self.data = {}
@@ -47,7 +56,9 @@ class Corpus:
 		# Add
 		content = article["content"]
 		for token in content.split():
-			token = token.translate(None, string.punctuation.translate(None, "\'"))
+			token = normalize(token)
+			if len(token) == 0:
+				continue
 			self.termIndex.setdefault(token.lower(), set()).add(guid)
 		tags = article["tag"]
 		for t in tags:
@@ -60,7 +71,9 @@ class Corpus:
 		# Remove
 		content = old["content"]
 		for token in content.split():
-			token = token.translate(None, string.punctuation.translate(None, "\'"))
+			token = normalize(token)
+			if len(token) == 0:
+				continue
 			self.termIndex.setdefault(token.lower(), set()).discard(guid)
 		tags = old["tag"]
 		for t in tags:
