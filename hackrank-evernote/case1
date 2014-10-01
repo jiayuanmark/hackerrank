@@ -41,7 +41,7 @@ CREATE
   <tag>poetry</tag>
   <tag>byron</tag>
   <content>
-    Unhappy Dives! in an evil hour
+    Unhappy1 Dives! in an evil hour
     'Gainst Nature's voice seduced to deeds accurst!
     Once Fortune's minion now thou feel'st her power;
     Wrath's vial on thy lofty head hath burst.
@@ -263,3 +263,7 @@ SEARCH
 child*
 SEARCH
 smoke fo*
+SEARCH
+'gainst
+SEARCH
+unHAPPY1

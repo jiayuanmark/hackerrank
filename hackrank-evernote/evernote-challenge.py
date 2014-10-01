@@ -55,7 +55,7 @@ class Corpus:
 		guid = article["guid"]
 		self.article[guid] = article
 		self.deleted.discard(guid)
-		# Update index
+		# update index
 		content = article["content"]
 		for token in content.split():
 			token = normalize(token)
@@ -69,7 +69,7 @@ class Corpus:
 	def update(self, article):
 		guid = article["guid"]
 		old = self.article[guid]
-		# Remove from index
+		# remove from index
 		content = old["content"]
 		for token in content.split():
 			token = normalize(token)
@@ -84,39 +84,83 @@ class Corpus:
 	def delete(self, guid):
 		self.deleted.add(guid)
 
-	def searchByTerms(self, terms):
-		resList = []
-		for term in terms.split():
-			q = makeRegexQuery(term.lower())
-			res = set()
-			for key in self.termIndex:
-				if re.match(q, key) is not None:
-					res.update(self.termIndex[key])
-			resList.append(res)
+	def search(self, querystr):
+		query = querystr.lower().split()
+		tagQuery, termQuery = [], []
+		timeQuery = 0
+		for subquery in query:
+			if subquery.startswith("tag:"):
+				tagQuery.append(subquery[4:])
+			elif subquery.startswith("created:"):
+				dt = datetime.strptime(subquery[8:], "%Y%m%d")
+				timeQuery = max(timeQuery, int(dt.strftime('%s')))
+			else:
+				termQuery.append(subquery)
 
-		allres = resList[0]
-		for s in resList:
-			allres.intersection_update(s) 
+		res = None
+		# create time query
+		if timeQuery != 0:
+			res = self.searchByCreateTime(timeQuery)
+			if len(res) == 0:
+				self.printResult(res)
+				return
+		# tag query
+		if len(tagQuery) != 0:
+			res = self.searchByTermOrTag(self.tagIndex, tagQuery, res)
+			if len(res) == 0:
+				self.printResult(res)
+				return
+		# term query
+		if len(termQuery) != 0:
+			res = self.searchByTermOrTag(self.termIndex, termQuery, res)
 
-		allres.difference_update(self.deleted)
-		self.printResult(allres)
-
-	def searchByTag(self, tag):
-		res = set()
-		q = makeRegexQuery(tag.lower())
-		for key in self.tagIndex:
-			if re.match(q, key) is not None:
-				res.update(self.tagIndex[key])
-		res.difference_update(self.deleted)
 		self.printResult(res)
+
+
+	def searchByTermOrTag(self, index, query, res=None):
+		prefixQuery = filter(lambda x:x.endswith("*"), query)
+		normalQuery = filter(lambda x:not x.endswith("*"), query)
+
+		# order by length
+		normalQuery = sorted(normalQuery, key=lambda x:len(index.get(x, set())))
+		
+		# initial set
+		sol = None
+		if res is not None:
+			sol = res
+		elif len(normalQuery) != 0:
+			sol = index.get(normalQuery[0], set())
+		else:
+			sol = set()
+			pq = makeRegexQuery(prefixQuery[0])
+			for key in index:
+				if re.match(pq, key) is not None:
+					sol.update(index[key])
+
+		# execute normal query
+		for qry in normalQuery:
+			sol.intersection_update(index.get(qry, set()))
+			if len(sol) == 0:
+				return sol
+
+		# execute prefix query
+		for pqry in prefixQuery:
+			temp = set()
+			pq = makeRegexQuery(pqry)
+			for key in index:
+				if re.match(pq, key) is not None:
+					temp.update(index[key])
+			sol.intersection_update(temp)
+			if len(sol) == 0:
+				return sol
+		sol.difference_update(self.deleted)
+		return sol
 
 	def searchByCreateTime(self, time):
-		dt = datetime.strptime(time, "%Y%m%d")
-		ts = int(dt.strftime('%s'))
-		after = filter(lambda x : isoDateToEpoch(x["created"]) >= ts, self.article.values())
+		after = filter(lambda x : isoDateToEpoch(x["created"]) >= time, self.article.values())
 		res = set(map(lambda x:x["guid"], after))
 		res.difference_update(self.deleted)
-		self.printResult(res)
+		return res
 
 class Command:
 	def __init__(self, cmd, payload):
@@ -133,12 +177,7 @@ class Command:
 		elif self.cmd == "DELETE":
 			corpus.delete(self.payload)
 		elif self.cmd == "SEARCH":
-			if self.payload.startswith("tag:"):
-				corpus.searchByTag(self.payload[4:])
-			elif self.payload.startswith("created:"):
-				corpus.searchByCreateTime(self.payload[8:])
-			else:
-				corpus.searchByTerms(self.payload)
+			corpus.search(self.payload)
 
 def parseCommands(content):
 	commands = set(["CREATE", "UPDATE", "DELETE", "SEARCH"])
