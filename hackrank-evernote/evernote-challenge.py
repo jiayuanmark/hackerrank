@@ -14,11 +14,19 @@ def makeRegexQuery(s):
 	return ('^' + t)
 
 punc = set(string.punctuation.translate(None, "'"))
+punc2 = set(string.punctuation.translate(None, "'*"))
 
 def normalize(s):
 	while len(s) > 0 and s[0] in punc:
 		s = s[1:]
 	while len(s) > 0 and s[-1] in punc:
+		s = s[:-1]
+	return s
+
+def normalize2(s):
+	while len(s) > 0 and s[0] in punc:
+		s = s[1:]
+	while len(s) > 0 and s[-1] in punc2:
 		s = s[:-1]
 	return s
 
@@ -57,11 +65,12 @@ class Corpus:
 		self.deleted.discard(guid)
 		# update index
 		content = article["content"]
+		content = content.replace("-", " ")
 		for token in content.split():
-			token = normalize(token)
-			if len(token) == 0:
-				continue
-			self.termIndex.setdefault(token.lower(), set()).add(guid)
+			token = normalize(token.lower())
+			if len(token) != 0:
+				self.termIndex.setdefault(token, set()).add(guid)
+
 		tags = article["tag"]
 		for t in tags:
 			self.tagIndex.setdefault(t, set()).add(guid)
@@ -71,11 +80,12 @@ class Corpus:
 		old = self.article[guid]
 		# remove from index
 		content = old["content"]
+		content = content.replace("-", " ")
 		for token in content.split():
-			token = normalize(token)
-			if len(token) == 0:
-				continue
-			self.termIndex.setdefault(token.lower(), set()).discard(guid)
+			token = normalize(token.lower())
+			if len(token) != 0:
+				self.termIndex.setdefault(token, set()).discard(guid)
+
 		tags = old["tag"]
 		for t in tags:
 			self.tagIndex.setdefault(t, set()).discard(guid)
@@ -90,12 +100,12 @@ class Corpus:
 		timeQuery = 0
 		for subquery in query:
 			if subquery.startswith("tag:"):
-				tagQuery.append(subquery[4:])
+				tagQuery.append(normalize2(subquery[4:]))
 			elif subquery.startswith("created:"):
 				dt = datetime.strptime(subquery[8:], "%Y%m%d")
 				timeQuery = max(timeQuery, int(dt.strftime('%s')))
 			else:
-				termQuery.append(subquery)
+				termQuery.append(normalize2(subquery))
 
 		res = None
 		# create time query
@@ -123,7 +133,7 @@ class Corpus:
 
 		# order by length
 		normalQuery = sorted(normalQuery, key=lambda x:len(index.get(x, set())))
-		
+
 		# initial set
 		sol = None
 		if res is not None:
