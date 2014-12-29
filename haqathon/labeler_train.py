@@ -5,7 +5,7 @@ class Model:
 	def __init__(self):
 		self.row = 20000
 		self.col = 200
-		self.mat = [[0.0 for _ in range(self.col)] for x in range(self.row) ] 
+		self.mat = [[0.0 for _ in range(self.col)] for _ in range(self.row) ] 
 		self.mvec = [0.0 for _ in range(self.col) ]
 
 	def hash(self, payload):
