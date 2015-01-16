@@ -4,7 +4,7 @@ import Control.Applicative
 import Control.Monad
 import Data.Array
 import qualified Data.List as L
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 
 import Debug.Trace (trace)
 
@@ -15,15 +15,15 @@ type Buffer = [Int]
 solve :: Int -> [Int] -> Queue -> Path -> Path
 solve _ _ [] !p = p
 solve !n !mu !q !p
-  | n `M.member` p          = p
-  | n `M.member` exp        = M.insert n (M.findWithDefault (-1) n exp) p
-  | n < fst (M.findMin exp) = M.empty
-  | otherwise               = solve n mu nq np
+  | n `M.member` p      = p
+  | M.null front        = M.empty
+  | n `M.member` front  = M.insert n (M.findWithDefault (-1) n front) p
+  | otherwise           = solve n mu nq np
   where
-    go x   = map (\y -> (x*y, x)) mu
-    exp    = M.fromListWith min (concatMap go q)
-    nq     = M.keys (M.difference exp p)
-    np     = M.union p $ exp
+    go x   = filter ((n >=) . fst) $ map (\y -> (x*y, x)) mu
+    front  = M.fromListWith min (q >>= go)
+    nq     = M.keys (M.difference front p)
+    np     = M.union p $ front
 
 backTrack :: Path -> Int -> Buffer -> IO ()
 backTrack _ (-1) b  = putStrLn $ unwords (map show b)
