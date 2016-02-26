@@ -49,7 +49,7 @@ calc n states
           -> Int          -- ^ Total index
           -> V.Vector Int -- ^ Costs after prev state
           -> Int          -- ^ Min costs
-    calc' i n dp
+    calc' !i !n dp
       | i > n     = V.minimum dp
       | otherwise = calc' (i+1) n (V.snoc lhs rhs)
       where

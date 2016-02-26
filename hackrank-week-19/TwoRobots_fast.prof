@@ -1,0 +1,60 @@
+	Thu Feb 25 23:58 2016 Time and Allocation Profiling Report  (Final)
+
+	   TwoRobots_fast +RTS -p -RTS
+
+	total time  =        2.75 secs   (2746 ticks @ 1000 us, 1 processor)
+	total alloc = 2,712,708,512 bytes  (excludes profiling overheads)
+
+COST CENTRE    MODULE  %time %alloc
+
+calc.calc'.rhs Main     48.9   51.9
+calc.calc'.lhs Main     23.1   20.3
+solve          Main      9.6   13.1
+move           Main      9.2    5.8
+calc.move'     Main      3.8    0.0
+cost           Main      2.9    5.8
+calc.calc'     Main      2.3    3.2
+
+
+                                                              individual     inherited
+COST CENTRE         MODULE                  no.     entries  %time %alloc   %time %alloc
+
+MAIN                MAIN                     97           0    0.0    0.0   100.0  100.0
+ main               Main                    195           0    0.0    0.0   100.0  100.0
+  solve             Main                    198           0    9.6   13.1    99.9  100.0
+   calc             Main                    200          50    0.0    0.0    90.3   86.9
+    calc.iniVal     Main                    203          50    0.0    0.0     0.0    0.0
+     cost           Main                    204          50    0.0    0.0     0.0    0.0
+      dst           Main                    206          50    0.0    0.0     0.0    0.0
+      src           Main                    205          50    0.0    0.0     0.0    0.0
+    calc.calc'      Main                    201       27007    2.3    3.2    90.3   86.9
+     calc.calc'.rhs Main                    215       26957   48.9   51.9    64.7   63.4
+      calc.move'    Main                    216     9755041    3.7    0.0    15.8   11.5
+       move         Main                    217     9755041    9.2    5.7    12.1   11.5
+        dst         Main                    222     9728084    0.0    0.0     0.0    0.0
+        src         Main                    221     9728084    0.0    0.0     0.0    0.0
+        cost        Main                    218     9755041    2.9    5.8     2.9    5.8
+         dst        Main                    220     9755041    0.0    0.0     0.0    0.0
+         src        Main                    219     9755041    0.0    0.0     0.0    0.0
+     calc.calc'.inc Main                    207       26957    0.0    0.0     0.1    0.0
+      calc.move'    Main                    208       26957    0.1    0.0     0.1    0.0
+       move         Main                    209       26957    0.1    0.0     0.1    0.0
+        dst         Main                    214       26957    0.0    0.0     0.0    0.0
+        src         Main                    213       26957    0.0    0.0     0.0    0.0
+        cost        Main                    210       26957    0.0    0.0     0.0    0.0
+         dst        Main                    212       26957    0.0    0.0     0.0    0.0
+         src        Main                    211       26957    0.0    0.0     0.0    0.0
+     calc.calc'.lhs Main                    202       26957   23.1   20.3    23.1   20.3
+ CAF:main1          Main                    190           0    0.0    0.0     0.0    0.0
+  main              Main                    194           1    0.0    0.0     0.0    0.0
+ CAF:main3          Main                    189           0    0.0    0.0     0.0    0.0
+  main              Main                    196           0    0.0    0.0     0.0    0.0
+ CAF:main2          Main                    188           0    0.0    0.0     0.0    0.0
+  solve             Main                    197           1    0.0    0.0     0.0    0.0
+ CAF:lvl12_r9vk     Main                    166           0    0.0    0.0     0.0    0.0
+ CAF                GHC.Conc.Signal         141           0    0.0    0.0     0.0    0.0
+ CAF                GHC.IO.Encoding         135           0    0.0    0.0     0.0    0.0
+ CAF                GHC.IO.Encoding.Iconv   133           0    0.0    0.0     0.0    0.0
+ CAF                GHC.IO.Handle.FD        126           0    0.0    0.0     0.0    0.0
+ CAF                GHC.IO.Handle.Text      124           0    0.0    0.0     0.0    0.0
+ CAF                Text.Read.Lex           114           0    0.0    0.0     0.0    0.0
