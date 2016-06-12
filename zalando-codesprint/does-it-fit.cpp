@@ -9,6 +9,8 @@
 
 using namespace std;
 
+typedef long long LL;
+
 int main() {
 	int W, H, n;
 	scanf("%d%d", &W, &H);
@@ -32,13 +34,15 @@ int main() {
 			scanf("%d%d", &w, &h);
 			int p = max(w, h);
 			int q = min(w, h);
-			if (p <= a && q <= b) {
+			if (q > b) {
+				printf("NO\n");
+			} else if (p <= a) {
 				printf("YES\n");
 			} else {
-				int ssum = p * p + q * q;
-				double cmp = double(2 * p * q * a) + (p*p - q*q) * sqrt(ssum - a * a);
-				cmp /= ssum;
-				if (p > a && b - cmp >= 0) {
+				LL d1 = LL(p-q)*LL(p-q);
+				LL d2 = LL(p+q)*LL(p+q);
+				bool can = LL(a+b)*LL(a+b)*d1 + LL(a-b)*LL(a-b)*d2 >= 2*d1*d2;
+				if (can) {
 					printf("YES\n");
 				} else {
 					printf("NO\n");
